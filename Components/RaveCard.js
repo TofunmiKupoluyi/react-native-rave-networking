@@ -12,6 +12,19 @@ export default class Card extends RavePayment{
         return super.charge(payload, endpoint);
     }
 
+    preauth(payload){
+        let endpoint = this.baseUrl + this.endpointMap["card"]["charge"];
+        // if transaction is not defined or not set properly
+        if(!("txRef" in payload))
+            payload["txRef"] = RaveApi.generateTransactionReference();
+        
+        // adds charge_type if it is not defined or not set correctly
+        if(!("charge_type" in payload) || payload["charge_type"] !== "preauth")
+            payload["charge_type"] = "preauth"
+
+        return super.charge(payload, endpoint);
+    }
+
     validate(otp, flwRef){
         let endpoint = this.baseUrl + this.endpointMap["card"]["validate"];
         return super.validate(otp, flwRef, endpoint);
