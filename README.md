@@ -3,7 +3,7 @@
 ## Sample Account Transaction
 
 ```
-import RaveApi from './RaveNetworking/RaveApi'
+import RaveApi from './path_to_this_directory/RaveApi'
 
 rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= True|False);
 
@@ -34,7 +34,7 @@ rave.Account.charge({
 ```
 ## Sample Card Transaction
 ```
-import RaveApi from './RaveNetworking/RaveApi'
+import RaveApi from './path_to_this_directory/RaveApi'
 
 rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= True|False);
 rave.Card.charge({
