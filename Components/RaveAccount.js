@@ -1,4 +1,4 @@
-import RavePayment from "../RavePaymentBase"
+import RavePayment from "../Core/RavePaymentBase"
 import RaveApi from "../RaveApi"
 export default class Account extends RavePayment{
     constructor(publicKey, secretKey, production=false){
