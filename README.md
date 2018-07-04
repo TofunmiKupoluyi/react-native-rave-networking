@@ -1,4 +1,4 @@
-# RaveNetworking for React-Native
+# Rave API calls for React-Native
 
 ## Sample Account Transaction
 
