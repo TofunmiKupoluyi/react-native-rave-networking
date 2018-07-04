@@ -1,4 +1,3 @@
-import RaveCore from "./RaveCore";
 import Card from "./Components/RaveCard"
 import Account from "./Components/RaveAccount"
 
