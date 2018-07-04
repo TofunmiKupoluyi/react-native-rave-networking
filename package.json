@@ -1,0 +1,16 @@
+{
+  "name": "rave-networking-react-native",
+  "version": "1.0.0",
+  "description": "Library for making Rave API calls on react-native",
+  "main": "RaveApiCalls.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tofunmi Kupoluyi",
+  "license": "ISC",
+  "dependencies": {
+    "md5": "^2.2.1",
+    "node-forge": "^0.7.5",
+    "utf8": "^3.0.0"
+  }
+}
