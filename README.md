@@ -64,3 +64,30 @@ rave.Card.charge({
       })
 
 ```
+
+## Sample Card Preauth Transaction
+
+```
+import RaveApi from 'react-native-rave-networking';
+
+rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= true|false);
+rave.Card.preauth({
+    "cardno": "5438898014560229",
+    "cvv": "890",
+    "expirymonth": "09",
+    "expiryyear": "19",
+    "amount": "10",
+    "email": "user@gmail.com",
+    "phonenumber": "0902620185",
+    "firstname": "temi",
+    "lastname": "desola",
+    "IP": "355426087298442"
+    })
+      .then((res)=>{
+        console.log(res);
+      })
+      .catch((err)=>{
+        console.error(err);
+      })
+
+```
