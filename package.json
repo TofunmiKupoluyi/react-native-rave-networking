@@ -2,7 +2,7 @@
   "name": "react-native-rave-networking",
   "version": "1.0.0",
   "description": "Library for making Rave API calls on react-native",
-  "main": "RaveApiCalls.js",
+  "main": "RaveApi.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
