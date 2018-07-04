@@ -5,7 +5,7 @@
 ```
 import RaveApi from 'react-native-rave-networking';
 
-rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= True|False);
+rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= true|false);
 
 rave.Account.charge({
       "accountbank": "232",
@@ -36,7 +36,7 @@ rave.Account.charge({
 ```
 import RaveApi from 'react-native-rave-networking';
 
-rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= True|False);
+rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= true|false);
 rave.Card.charge({
     "cardno": "5438898014560229",
     "cvv": "890",
