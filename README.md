@@ -1,6 +1,6 @@
 # RaveNetworking for React-Native
 
-## Sample Card Transaction
+## Sample Account Transaction
 
 ```
 import RaveApi from './RaveNetworking/RaveApi'
@@ -32,7 +32,7 @@ rave.Account.charge({
       })
 
 ```
-## Sample Account Transaction
+## Sample Card Transaction
 ```
 import RaveApi from './RaveNetworking/RaveApi'
 
