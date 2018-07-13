@@ -1,6 +1,5 @@
-import Card from "./Components/RaveCard"
-import Account from "./Components/RaveAccount"
-
+import Card from "./Components/RaveCard";
+import Account from "./Components/RaveAccount";
 export default class RaveApi{
     constructor(publicKey, secretKey, production=false){
         this.Card = new Card(publicKey, secretKey, production);
@@ -13,4 +12,8 @@ export default class RaveApi{
     }
 
 }
+
+export {default as VBVComponent} from "./ReactNativeComponents/VBVComponent";
+
+
 

@@ -9,11 +9,10 @@ export default class Account extends RavePayment {
         let endpoint = this.baseUrl + this.endpointMap["account"]["charge"];
 
         // adding boilerplate parameters
+        payload["payment_type"] = "account"
+        // check if a transaction reference is present first
         if (!("txRef" in payload))
             payload["txRef"] = RaveApi.generateTransactionReference();
-
-        if (!("payment_type" in payload))
-            payload["payment_type"] = "account"
 
         return super.charge(payload, endpoint);
     }
@@ -37,13 +36,5 @@ export default class Account extends RavePayment {
 
     }
 
-    handleValidate(responseJson, resolve, reject) {
-        if ("data" in responseJson && responseJson["data"]["chargeResponseCode"] == "00")
-            resolve({ status: responseJson["status"], validationComplete: true, flwRef: responseJson["data"]["flwRef"], txRef: responseJson["data"]["txRef"] })
-
-        else
-            reject({ status: responseJson["status"], validationComplete: false, flwRef: responseJson["data"]["flwRef"], txRef: responseJson["data"]["txRef"] });
-
-    }
 
 }
