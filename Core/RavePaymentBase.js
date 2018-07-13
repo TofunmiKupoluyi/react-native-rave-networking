@@ -100,4 +100,15 @@ export default class RavePayment extends RaveCore{
 
     }
 
+    handleValidate(responseJson, resolve, reject){
+        // This varies between card and other charge types
+        let flwRef = responseJson["data"]["flwRef"] || responseJson["data"]["tx"]["flwRef"]
+        let txRef = responseJson["data"]["flwRef"] || responseJson["data"]["tx"]["txRef"]
+        console.log(responseJson)
+        if ("data" in responseJson && responseJson["data"]["chargeResponseCode"] == "00")
+            resolve({ status: responseJson["status"], validationComplete: true, flwRef, txRef })
+        else
+            reject({ status: responseJson["status"], validationComplete: false, flwRef, txRef });
+    }
+
 }
