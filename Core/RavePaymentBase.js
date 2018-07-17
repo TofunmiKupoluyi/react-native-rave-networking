@@ -20,7 +20,7 @@ export default class RavePayment extends RaveCore{
             // In case the fetch call fails
             try{
 
-                var response = await fetch(endpoint, 
+                let response = await fetch(endpoint, 
                     {
                         method: 'POST',
                         headers: {
@@ -34,16 +34,15 @@ export default class RavePayment extends RaveCore{
                         })
                     }    
                 );
-            
+
+                let responseJson = await response.json();
                 // if response returns 2xx response code, pass to handleResponses
                 if(response.ok){
-                    let responseJson = await response.json();
                     resolve(this.handleCharge(responseJson, payload["txRef"])); // handleResponses must be defined in implementing classes
                 }
 
                 // else we reject with, "could not complete charge request"
                 else{
-                    let responseJson = await response.json();
                     reject(responseJson);
                 }
 
@@ -62,7 +61,7 @@ export default class RavePayment extends RaveCore{
 
             // In case the fetch call fails
             try{
-                var response = await fetch(endpoint, 
+                let response = await fetch(endpoint, 
                     {
                         method: 'POST',
                         headers: {
@@ -77,21 +76,18 @@ export default class RavePayment extends RaveCore{
                         })
                     }    
                 );
-            
+                
+                let responseJson = await response.json();
                 // if response returns 2xx response code, pass to handleResponses
-                if(response.ok){
-                    let responseJson = await response.json();
+                if(response.ok)
                     this.handleValidate(responseJson, resolve, reject); // Because validate response differs with payment type, we will allow validate resolve and reject. 
-                }
-
+                
                 // else we reject with, "could not complete charge request"
-                else{
-                    let responseJson = await response.json();
+                else
                     reject({...responseJson, flwRef});
-                }
-
+                
             }
-
+            
             catch(e){
                 reject({status: "error", message: e.toString(), flwRef});
             }
@@ -107,6 +103,7 @@ export default class RavePayment extends RaveCore{
         console.log(responseJson)
         if ("data" in responseJson && responseJson["data"]["chargeResponseCode"] == "00")
             resolve({ status: responseJson["status"], validationComplete: true, flwRef, txRef })
+            
         else
             reject({ status: responseJson["status"], validationComplete: false, flwRef, txRef });
     }
