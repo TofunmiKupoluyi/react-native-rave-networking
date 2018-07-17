@@ -36,32 +36,54 @@ rave.Account.charge({
 ```
 import RaveApi from 'react-native-rave-networking';
 
-rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_PRIVATE_KEY", production= true|false);
-rave.Card.charge({
-    "cardno": "5438898014560229",
-    "cvv": "890",
-    "expirymonth": "09",
-    "expiryyear": "19",
-    "amount": "10",
-    "email": "user@gmail.com",
-    "phonenumber": "0902620185",
-    "firstname": "temi",
-    "lastname": "desola",
-    "IP": "355426087298442"
-    })
-      .then((res)=>{
-        console.log(res);
-        this.rave.Account.validate("12345", res.flwRef)
-          .then((res)=>{
-            console.log(res);
-          })
-          .catch((err)=>{
-            console.error(err);
-          })
-      })
-      .catch((err)=>{
-        console.error(err);
-      })
+    async cardCharge() {
+      try {
+        payload = {
+          "cardno": "4556052704172643",
+          "cvv": "812",
+          "expirymonth": "01",
+          "expiryyear": "19",
+          "currency": "NGN",
+          "country": "NG",
+          "amount": "100",
+          "email": "user@example.com",
+          "phonenumber": "08056552980",
+          "firstname": "user",
+          "lastname": "example",
+          "billingzip": "07205",
+          "billingcity": "Hillside",
+          "billingaddress": "470 Mundet PI",
+          "billingstate": "NJ",
+          "billingcountry": "US",
+          "IP": "40.198.14"
+        }
+
+        res = await this.rave.Card.charge(payload)
+
+        if (res.suggestedAuth) { 
+          // update payload and recall charge
+        }
+        
+
+        if (!res.validationCompleted) {
+          // if an auth url is required for validation
+          if (res.authUrl) { 
+            // display the vbv modal
+            this.setState({
+              "displayModal": true,
+              "url": res.authUrl
+            });
+          } else {
+            // pass the otp to the validate call
+            res = await this.rave.Card.validate("12345", res.flwRef)
+            console.log(res)
+          }
+        }
+
+      } 
+      catch(e) {
+        console.error(e);
+      }
 
 ```
 
