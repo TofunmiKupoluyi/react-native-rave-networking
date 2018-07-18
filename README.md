@@ -209,41 +209,8 @@ export default class App extends React.Component {
       }
   }
 
-  async accountCharge() {
-    // remember to pass passcode for zenith bank
-    try {
-      let payload = {
-        "accountbank": "232", // get the bank code from the bank list endpoint.
-        "accountnumber": "0061333471",
-        "currency": "NGN",
-        "country": "NG",
-        "amount": "100",
-        "email": "test@test.com",
-        "phonenumber": "0902620185",
-      }
-
-      let res = await this.rave.Account.charge(payload)
-       
-      if (res.authUrl) {
-        this.setState({
-          "displayModal": true,
-          "url": res.authUrl
-        });
-      } 
-          // if it is not
-      else {
-        res = await this.rave.Account.validate("12345", res.flwRef)
-        console.log(res)
-      }  
-    }
-    catch (e) {
-      console.error(e);
-    }
-    
-  }
-
   componentDidMount() {
-    this.accountCharge();
+    this.cardCharge();
   }
 
   
