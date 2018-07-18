@@ -14,13 +14,12 @@ export default class RaveCore{
             card: {
                 "charge": "flwv3-pug/getpaidx/api/charge",
                 "validate": "flwv3-pug/getpaidx/api/validatecharge",
-                "verify": "flwv3-pug/getpaidx/api/v2/verify",
             },
             account: {
                 "charge": "flwv3-pug/getpaidx/api/charge",
                 "validate": "flwv3-pug/getpaidx/api/validate",
-                "verify": "flwv3-pug/getpaidx/api/v2/verify",
-            }
+            },
+            verify: "flwv3-pug/getpaidx/api/v2/verify",
         }
         
         // To keep public and secret keys private

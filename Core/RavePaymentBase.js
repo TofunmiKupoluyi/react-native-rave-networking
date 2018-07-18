@@ -2,110 +2,168 @@ import RaveCore from "./RaveCore";
 
 // This is an abstract class
 
-export default class RavePayment extends RaveCore{
-    constructor(publicKey, secretKey, production=false){
+export default class RavePayment extends RaveCore {
+    constructor(publicKey, secretKey, production = false) {
         super(publicKey, secretKey, production);
     }
 
-    charge(payload, endpoint){
-        return new Promise(async (resolve, reject)=>{
-            // If encryption fails
-            try{
-                var encryptedPayload = this.encrypt(JSON.stringify(payload));
+    // Helper methods 
+
+    encryptCharge(payload, errResponse, reject) {
+        // Attempting to encrypt payload
+        try {
+            let encryptedPayload = this.encrypt(JSON.stringify(payload));
+            return encryptedPayload;
+        }
+        // if it fails add message to errResponse and call the reject passed down
+        catch (e) {
+            errResponse.message = "Please pass accurate public and secret keys";
+            reject(errResponse);
+        }
+    }
+
+    // Payment methods
+
+    charge(payload, endpoint, fullResponse) {
+        return new Promise(async (resolve, reject) => {
+            // What is returned on promise rejection that occured before a json was derived
+            let errResponse = {
+                status: "error",
+                message: null,
+                data: null
             }
-            catch(e){
-                reject({status: "error", message: "Please pass accurate public and secret keys", data: null});
-            }
+            var encryptedPayload = this.encryptCharge(payload, errResponse, reject);
+            // Attempting to charge
+            try {
+                // Charging
+                let response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "PBFPubKey": this.getPublicKey(),
+                        "client": encryptedPayload,
+                        "alg": "3DES-24"
+                    })
+                });
 
-            // In case the fetch call fails
-            try{
-
-                let response = await fetch(endpoint, 
-                    {
-                        method: 'POST',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            "PBFPubKey": this.getPublicKey(),
-                            "client": encryptedPayload,
-                            "alg": "3DES-24"
-                        })
-                    }    
-                );
-
+                // getting json
                 let responseJson = await response.json();
-                // if response returns 2xx response code, pass to handleResponses
-                if(response.ok){
-                    resolve(this.handleCharge(responseJson, payload["txRef"])); // handleResponses must be defined in implementing classes
+
+                // if response returns 2xx response code
+                if (response.ok) {
+                    // If the user opts for full response
+                    if (fullResponse)
+                        resolve(responseJson);
+                    else
+                        resolve(this.handleCharge(responseJson, payload["txRef"])); // handleResponses must be defined in implementing classes
                 }
 
-                // else we reject with, "could not complete charge request"
-                else{
+                // else we reject with the json body
+                else {
+                    // In this case instead of passing our custom errResponse, determined better to just send the responseJson gotten to avoid duplication
                     reject(responseJson);
                 }
 
+            } catch (e) {
+                errResponse.message = e.toString();
+                reject(errResponse);
             }
 
-            catch(e){
-                reject({status: "error", message: e.toString(), data: null});
-            }
+        });
 
-        })
-        
     }
 
-    validate(otp, flwRef, endpoint){
-        return new Promise(async (resolve, reject)=>{
+    validate(otp, flwRef, endpoint, fullResponse = false) {
+        return new Promise(async (resolve, reject) => {
+            // What is returned on promise rejection that does not go to handleValidate
+            let errResponse = {
+                status: "error",
+                message: null,
+                data: null,
+                flwRef
+            }
 
-            // In case the fetch call fails
-            try{
-                let response = await fetch(endpoint, 
-                    {
-                        method: 'POST',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            "PBFPubKey": this.getPublicKey(),
-                            "transactionreference": flwRef, 
-                            "transaction_reference": flwRef,
-                            "otp": otp
-                        })
-                    }    
-                );
-                
+            // Attempting to validate
+            try {
+                let response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "PBFPubKey": this.getPublicKey(),
+                        "transactionreference": flwRef,
+                        "transaction_reference": flwRef,
+                        "otp": otp
+                    })
+                });
+
+                // generating json
                 let responseJson = await response.json();
-                // if response returns 2xx response code, pass to handleResponses
-                if(response.ok)
-                    this.handleValidate(responseJson, resolve, reject); // Because validate response differs with payment type, we will allow validate resolve and reject. 
-                
-                // else we reject with, "could not complete charge request"
+
+                // if response returns 2xx response code, pass to handleValidate
+                if (response.ok) {
+                    this.handleValidate(responseJson, flwRef, fullResponse, resolve, reject); // Because validate response differs with payment type, we will allow validate resolve and reject. 
+                }
+
+                // else we reject with the json body
                 else
-                    reject({...responseJson, flwRef});
-                
+                    reject(responseJson);
+
+            } catch (e) {
+                errResponse.message = e.toString();
+                reject(errResponse);
             }
-            
-            catch(e){
-                reject({status: "error", message: e.toString(), flwRef});
-            }
-            
-        })
+
+        });
 
     }
 
-    handleValidate(responseJson, resolve, reject){
-        // This varies between card and other charge types
-        let flwRef = responseJson["data"]["flwRef"] || responseJson["data"]["tx"]["flwRef"]
-        let txRef = responseJson["data"]["flwRef"] || responseJson["data"]["tx"]["txRef"]
-        console.log(responseJson)
-        if ("data" in responseJson && responseJson["data"]["chargeResponseCode"] == "00")
-            resolve({ status: responseJson["status"], validationComplete: true, flwRef, txRef })
-            
-        else
-            reject({ status: responseJson["status"], validationComplete: false, flwRef, txRef });
+
+    // verify() {
+    //     return new Pr
+    // }
+
+
+    // Handlers
+
+    handleCharge(responseJson, txRef) {
+        throw new Error('handleCharge is an abstract method. Please implement the function in the calling class.');
+     }
+
+    handleValidate(responseJson, flwRef, fullResponse, resolve, reject) {
+        // This is what is returned if successful
+        data = {
+            status: null,
+            flwRef,
+            txRef: null
+        }
+        
+
+        if ("data" in responseJson) {
+            // setting txRef and status (card transaction body is stored in tx)
+            data.txRef = responseJson["data"]["txRef"] || responseJson["data"]["tx"]["txRef"]
+            data.status = responseJson["data"]["status"] || responseJson["data"]["tx"]["status"]
+
+            // checks if data.chargeResponseCode is 00, or if the chargeResponseCode is in responseJson.data.tx (card) and if that one is 00
+            if (responseJson["data"]["chargeResponseCode"] == "00" || ("chargeResponseCode" in responseJson["data"]["tx"] && responseJson["data"]["tx"]["chargeResponseCode"] == "00")) {
+                // sets status to success
+                data.status = "success";
+                data = (fullResponse) ? responseJson : data;
+                resolve(data)
+            } 
+            // If the validation was not successful, reject with responseJSon
+            else {
+                reject(responseJson);
+            }
+        }
+        // if data is not in responseJSon or none of the cases were caught, reject with responseJson
+        reject(responseJson);
+
     }
 
 }
