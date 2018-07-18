@@ -6,7 +6,7 @@ export default class Account extends RavePayment {
         super(publicKey, secretKey, production);
     }
 
-    charge(payload) {
+    charge(payload, fullResponse = false) {
         let endpoint = this.baseUrl + this.endpointMap["account"]["charge"];
 
         // adding boilerplate parameters
@@ -16,42 +16,34 @@ export default class Account extends RavePayment {
         if (!("txRef" in payload))
             payload["txRef"] = RaveApi.generateTransactionReference();
 
-        return super.charge(payload, endpoint);
+        return super.charge(payload, endpoint, fullResponse);
 
     }
 
-    validate(otp, flwRef) {
+    validate(otp, flwRef, fullResponse = false) {
         let endpoint = this.baseUrl + this.endpointMap["account"]["validate"];
-        return super.validate(otp, flwRef, endpoint);
+        return super.validate(otp, flwRef, endpoint, fullResponse);
     }
 
+    // Implementing abstract handleCharge method
     handleCharge(responseJson, txRef) {
-        // if authurl is something other than NO-URL, return authSuggested with the auth url
-        if ("data" in responseJson && "authurl" in responseJson["data"] && responseJson["data"]["authurl"] !== "NO-URL")
-            return {
-                status: responseJson["data"]["status"],
-                authUrl: responseJson["data"]["authurl"],
-                validationComplete: false,
-                flwRef: responseJson["data"]["flwRef"],
-                txRef
-            }
+        // This is what is returned from the function
+        let data = {
+            status: null,
+            authUrl: null,
+            validationComplete: null,
+            flwRef: null,
+            txRef
+        }
 
-        // if no validation is required, return validationComplete to be true
-        else if ("data" in responseJson && responseJson["data"]["chargeResponseCode"] == "00")
-            return {
-                status: responseJson["data"]["status"],
-                validationComplete: true,
-                flwRef: responseJson["data"]["flwRef"],
-                txRef
-            }
+        if ("data" in responseJson) {
+            data.status = responseJson["data"]["status"];
+            data.flwRef = responseJson["data"]["flwRef"];
+            data.validationComplete = (responseJson["data"]["chargeResponseCode"] === "00") ? true : false;
+            data.authUrl = (responseJson["data"]["authurl"] !== "NO-URL") ? responseJson["data"]["authurl"] : null;
+        }
 
-        else
-            return {
-                status: responseJson["data"]["status"],
-                validationComplete: false,
-                flwRef: responseJson["data"]["flwRef"],
-                txRef
-            }
+        return data;
 
     }
 
