@@ -124,16 +124,49 @@ export default class RavePayment extends RaveCore {
     }
 
 
-    // verify() {
-    //     return new Pr
-    // }
+    verify(txRef, fullResponse) {
+        return new Promise(async (resolve, reject) => {
+            let endpoint = this.baseUrl + this.endpointMap["verify"];
+            let errResponse = {
+                status: "error",
+                message: null,
+                data: null,
+                txRef
+            }
+
+            try {
+                let response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "SECKEY": this.getSecretKey(),
+                        "txref": txRef
+                    })
+                });
+
+                let responseJson = await response.json();
+
+                if (response.ok) {
+                    this.handleVerify(responseJson, txRef, resolve, reject)
+                } else {
+                    reject(responseJson);
+                }
+            } catch (e) {
+                errResponse.message = e.toString();
+                reject(errResponse)
+            }
+        });
+    }
 
 
     // Handlers
 
     handleCharge(responseJson, txRef) {
         throw new Error('handleCharge is an abstract method. Please implement the function in the calling class.');
-     }
+    }
 
     handleValidate(responseJson, flwRef, fullResponse, resolve, reject) {
         // This is what is returned if successful
@@ -142,7 +175,7 @@ export default class RavePayment extends RaveCore {
             flwRef,
             txRef: null
         }
-        
+
 
         if ("data" in responseJson) {
             // setting txRef and status (card transaction body is stored in tx)
@@ -155,14 +188,21 @@ export default class RavePayment extends RaveCore {
                 data.status = "success";
                 data = (fullResponse) ? responseJson : data;
                 resolve(data)
-            } 
-            // If the validation was not successful, reject with responseJSon
-            else {
+            } else {
                 reject(responseJson);
             }
         }
         // if data is not in responseJSon or none of the cases were caught, reject with responseJson
         reject(responseJson);
+
+    }
+
+    handleVerify(responseJson, txRef, resolve, reject) {
+        // If charge response is successfully completed, resolve with the response, otherwise, reject
+        if ("data" in responseJson && responseJson["data"]["chargecode"] == "00")   
+            resolve(responseJson);
+        else 
+            reject(responseJson);
 
     }
 
