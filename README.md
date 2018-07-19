@@ -31,6 +31,7 @@ async accountCharge() {
         // if it is not
     else {
       res = await this.rave.Account.validate("12345", res.flwRef)
+      res = await this.rave.Account.verify(res.txRef)
       console.log(res)
     }  
   }
@@ -89,7 +90,8 @@ async cardCharge() {
       // if an auth url isn't required
       else {
         // pass the otp to the validate call
-        res = await this.rave.Card.validate("12345", res.flwRef)
+        res = await this.rave.Card.validate("12345", res.flwRef);
+        res = await this.rave.Card.verify(res.txRef)
         console.log(res)
       }
 
@@ -144,69 +146,69 @@ import {
 
 import RaveApi, {
   WebComponent
-} from 'react-native-rave-networking';
+} from './RaveNetworking/RaveApi';
 
 
 export default class App extends React.Component {
     constructor(props) {
-      super(props);
-      this.rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_SECRET_KEY");
-      this.state = {
+        super(props);
+        this.rave = new RaveApi("ENTER_YOUR_PUBLIC_KEY", "ENTER_YOUR_SECRET_KEY");
+        this.state = {
         "displayModal": false,
         "url": null
-      };
-      this.cardCharge = this.cardCharge.bind(this);
-      this.accountCharge = this.accountCharge.bind(this);
+        };
+        this.cardCharge = this.cardCharge.bind(this);
+        this.accountCharge = this.accountCharge.bind(this);
     }
 
     async cardCharge() {
-      try {
-        payload = {
-          "cardno": "4556052704172643",
-          "cvv": "812",
-          "expirymonth": "01",
-          "expiryyear": "19",
-          "currency": "NGN",
-          "country": "NG",
-          "amount": "100",
-          "email": "user@example.com",
-          "phonenumber": "08056552980",
-          "firstname": "user",
-          "lastname": "example",
-          "billingzip": "07205",
-          "billingcity": "Hillside",
-          "billingaddress": "470 Mundet PI",
-          "billingstate": "NJ",
-          "billingcountry": "US",
-          "IP": "40.198.14"
-        }
+        try {
+            payload = {
+                "cardno": "4556052704172643",
+                "cvv": "812",
+                "expirymonth": "01",
+                "expiryyear": "19",
+                "currency": "NGN",
+                "country": "NG",
+                "amount": "100",
+                "email": "user@example.com",
+                "phonenumber": "08056552980",
+                "firstname": "user",
+                "lastname": "example",
+                "billingzip": "07205",
+                "billingcity": "Hillside",
+                "billingaddress": "470 Mundet PI",
+                "billingstate": "NJ",
+                "billingcountry": "US",
+                "IP": "40.198.14"
+            }
 
-        res = await this.rave.Card.charge(payload)
-        console.log(res);
-        if (res.suggestedAuth) { 
-          // update payload and recall charge
-        }
-        
+            res = await this.rave.Card.charge(payload)
+            console.log(res);
+            if (res.suggestedAuth) {
+                // update payload and recall charge
+            }
 
-        if (!res.validationCompleted) {
-          // if an auth url is required for validation
-          if (res.authUrl) { 
-            // display the vbv modal
-            this.setState({
-              "displayModal": true,
-              "url": res.authUrl
-            });
-          } else {
-            // pass the otp to the validate call
-            res = await this.rave.Card.validate("12345", res.flwRef)
-            console.log(res)
-          }
-        }
 
-      } 
-      catch(e) {
-        console.error(e);
-      }
+            if (!res.validationCompleted) {
+                // if an auth url is required for validation
+                if (res.authUrl) {
+                    // display the vbv modal
+                    this.setState({
+                        "displayModal": true,
+                        "url": res.authUrl
+                    });
+                } else {
+                    // pass the otp to the validate call
+                    res = await this.rave.Card.validate("12345", res.flwRef)
+                    res = await this.rave.Card.verify(res.txRef);
+                    console.log(res)
+                }
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
   }
 
   componentDidMount() {
@@ -218,14 +220,22 @@ export default class App extends React.Component {
 
     if(this.state.displayModal){
       return(
-        <WebComponent url={this.state.url} getMessageReturned={(err, message)=>{
+        <WebComponent url={this.state.url} getMessageReturned={async (err, message)=>{
           if (err) {
             console.error(message);
           } else {
-            console.log(message);
-            this.setState({ ...this.state,
-              displayModal: false
-            })
+                try {
+                    // Check to see if the charge was successful
+                    res = await this.rave.Card.verify(res.txRef);
+                    console.log(res);
+                    this.setState({ ...this.state,
+                        displayModal: false
+                    });
+
+                } catch (e) {
+                    // if it wasnt
+                    console.error(e)
+                }
           }
         }}/>
       );
@@ -238,6 +248,8 @@ export default class App extends React.Component {
     );
   }
 }
+
+
 
 
 ```

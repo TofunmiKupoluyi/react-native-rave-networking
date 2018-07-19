@@ -16,6 +16,7 @@ export default class WebComponent extends React.Component{
         "txRef": response["txRef"]
       }
     }
+    
     render() {
       return (
         <WebView
